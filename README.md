@@ -1,2 +1,3 @@
 # GOntoSim
-Semantic Similarity 
+Semantic Similarity Measure for Gene Ontology
+
