@@ -77,6 +77,6 @@ python GOntoSim.py gontosim MF IEA 500
 
 
 
-Contact hammad.naveed@nu.edu.pk amna.kamran@nu.edu.pk
+Contact hammad.naveed@nu.edu.pk or amna.kamran@nu.edu.pk
 
 Feel free to contact us in case of any confusions.
