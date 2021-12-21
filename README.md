@@ -1,5 +1,7 @@
 # GOntoSim: A Semantic Similarity Measure based on LCA and Common Descendants
 
+Web server is available at http://www.cbrlab.org/GOntoSim.html.
+
 ## Dependencies
 - Goatools:
 Make sure your Python version >= 2.7, install the latest stable version via PyPI:
