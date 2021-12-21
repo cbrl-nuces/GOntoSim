@@ -1,7 +1,7 @@
 # GOntoSim: A Semantic Similarity Measure based on LCA and Common Descendants
 
 ## Dependencies
--Goatools
+- Goatools:
 Make sure your Python version >= 2.7, install the latest stable version via PyPI:
 
 ```
@@ -37,7 +37,7 @@ and contains the code to convert the annotations to the named tuples required in
 
 Any one of the following measures can be used to calculate the similarity:
 'gontosim',	'baseline', 'lca', 'baselineDesc', 'wang', 'gogo' 
-('resnik' and 'lin' can be calculated for MF only )s
+('resnik' and 'lin' can be calculated for MF only)
 
 The arguments required are the similarity measure, the GO Aspect (MF or BP), Evidence Code (IEA or NONIEA), number of samples 
 ```
