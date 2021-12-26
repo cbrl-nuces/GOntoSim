@@ -30,7 +30,7 @@ The association files are for the implementation of Resnik's and Lin's measures.
 
 - 'Semantic Similarity-code.ipynb' has the complete implementation. 
 
-- 'GOntoSim-Example Usage.ipynb' has a few examples for calculating similarities between 2 given GO-Terms.
+- 'GOntoSim-Example Usage.ipynb' has a few examples for calculating similarities between 2 given GO-Terms or 2 proteins.
 
 - Download GO annotations And Convert to Named Tuples.ipynb contains the code to download GO Annotations using the QuickGO API, filter the annotations as required, 
 and contains the code to convert the annotations to the named tuples required in the code.
