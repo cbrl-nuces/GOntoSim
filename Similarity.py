@@ -289,8 +289,8 @@ def highest_common_descendant(goterms, godag):
 	# Take the element at minimum depth.
 	common_children = common_children_go_ids(goterms, godag)
 	if len(common_children) != 0:
-		# take reldepth attribute instead of depth to accomodate all relationships
-		return min(common_children, key=lambda t: godag[t].reldepth)
+		# take depth attribute instead of depth to accomodate all relationships
+		return min(common_children, key=lambda t: godag[t].depth)
 	else:
 		return 0
 def all_paths_to_bottom(term, godag, x):
@@ -302,7 +302,7 @@ def all_paths_to_bottom(term, godag, x):
 
 	def _all_paths_to_bottom_recursive(rec):
 
-		if rec.reldepth == godag[term].reldepth+x:
+		if rec.depth == godag[term].depth+x:
 			return [[rec]]
 		else:
 			paths = []
@@ -372,9 +372,9 @@ def Similarity_of_Two_GOTerms(go_id1, go_id2, go, method):
 	elif method == 'GOntoSim':
 		hcd = highest_common_descendant((go_id1, go_id2), go)
 		if hcd != 0:
-			hcd_depth = go[hcd].reldepth
-			go1_depth = go[go_id1].reldepth
-			go2_depth = go[go_id2].reldepth
+			hcd_depth = go[hcd].depth
+			go1_depth = go[go_id1].depth
+			go2_depth = go[go_id2].depth
 			x = hcd_depth - go1_depth
 			y = hcd_depth - go2_depth
 			sv_a = Downward_Semantic_Value(go_id1, go, x)
@@ -401,9 +401,9 @@ def Similarity_of_Two_GOTerms(go_id1, go_id2, go, method):
 	elif method == 'Baseline_Desc':
 		hcd = highest_common_descendant((go_id1, go_id2), go)
 		if hcd != 0:
-			hcd_depth = go[hcd].reldepth
-			go1_depth = go[go_id1].reldepth
-			go2_depth = go[go_id2].reldepth
+			hcd_depth = go[hcd].depth
+			go1_depth = go[go_id1].depth
+			go2_depth = go[go_id2].depth
 			x = hcd_depth - go1_depth
 			y = hcd_depth - go2_depth
 			sv_a = Downward_Semantic_Value(go_id1, go, x)
@@ -421,9 +421,9 @@ def Similarity_of_Two_GOTerms(go_id1, go_id2, go, method):
 	elif method == 'Baseline_Desc_only':
 		hcd = highest_common_descendant((go_id1, go_id2), go)
 		if hcd != 0:
-			hcd_depth = go[hcd].reldepth
-			go1_depth = go[go_id1].reldepth
-			go2_depth = go[go_id2].reldepth
+			hcd_depth = go[hcd].depth
+			go1_depth = go[go_id1].depth
+			go2_depth = go[go_id2].depth
 			x = hcd_depth - go1_depth
 			y = hcd_depth - go2_depth
 			sv_a = Downward_Semantic_Value(go_id1, go, x)
@@ -482,12 +482,14 @@ def Agglomerative_Clustering(pathway, Genes, n_clusters, method, S_values):
 	for row in data:
 		data_matrix.append([(lambda x: 1-x)(x) for x in row])
 	my_data = pd.DataFrame(data = data_matrix, index=[x[0] for x in Genes],columns=[x[0]for x in Genes])
+	# print('distance matrix: ')
+	# print( my_data)
+	# writeDist = pathway + "_DistanceMatrix.csv"
+	# my_data.to_csv(writeDist)	
 	return Agglomerative(my_data,Genes, pathway, n_clusters)
 
 def Agglomerative( data, Genes, pathway, n_clusters):
-	#model = AgglomerativeClustering(n_clusters, affinity='precomputed', linkage='complete').fit(data)
 	model = AgglomerativeClustering(n_clusters, affinity='precomputed', linkage='complete').fit_predict(data)
-	#Single linkage minimizes the distance between the closest observations of pairs of clusters.
 	GeneNames = [gene.GeneName for gene in Genes]
 	return model.tolist()
 
