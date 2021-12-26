@@ -134,20 +134,6 @@ def all_paths_to_top(term, godag):
 
 		go_term = godag[term]
 		return _all_paths_to_top_recursive(go_term)
-#print(go.all_paths_to_top(go_id6)[0][0].item_id)
-def print_all_paths_to_top(go_id):
-	print("******ALL RELATIONSHIPS*******")
-	all_all_paths = all_paths_to_top(go_id, go)
-	number_of_all_paths = len(all_all_paths)
-	#print(number_of_all_paths)
-	#print(all_all_paths)
-	for index, path in enumerate(all_all_paths):
-		print("index = " + str(index))
-		path = list(reversed(path))
-		#for term in reversed(path):
-		for term in path:
-			print (term.item_id)
-	return all_all_paths
 def relationships_in_all_paths_to_top(go_id):
 	all_all_paths = all_paths_to_top(go_id, go)
 	for index, path in enumerate(all_all_paths):
@@ -206,7 +192,6 @@ def all_paths_to_top_wang(term, godag, optional_relationships):
 			return paths
 		go_term = godag[term]
 		return _all_paths_to_top_recursive(go_term)
-#print(go.all_paths_to_top(go_id6)[0][0].item_id)
 def relationships_in_all_paths_to_top_wang(go_id, go, optional_relationships):
 	all_all_paths = all_paths_to_top_wang(go_id, go, optional_relationships)
 	for index, path in enumerate(all_all_paths):
@@ -412,9 +397,7 @@ def Semantic_Value(go_id, go, method):
 			#if isMax == 'max':
 			maxPath = SumOfNodesOnEachPath.index(max(SumOfNodesOnEachPath))
 			return S_values_Modified[maxPath], SumOfNodesOnEachPath[maxPath]
-#			elif isMax == 'min':
-#				minPath = SumOfNodesOnEachPath.index(min(SumOfNodesOnEachPath))
-#				return S_values_Modified[minPath], SumOfNodesOnEachPath[minPath]
+
 def final_values(S_values, isMax):
 
 	''' helper function to assign the max of the weights assigned to each term'''
@@ -476,8 +459,7 @@ def highest_common_descendant(goterms, godag):
 	# Take the element at minimum depth.
 	common_children = common_children_go_ids(goterms, godag)
 	if len(common_children) != 0:
-		# take reldepth attribute instead of depth to accomodate all relationships
-		return min(common_children, key=lambda t: godag[t].reldepth)
+		return min(common_children, key=lambda t: godag[t].depth)
 	else:
 		return 0
 def all_paths_to_bottom(term, godag, x):
@@ -489,7 +471,7 @@ def all_paths_to_bottom(term, godag, x):
 
 	def _all_paths_to_bottom_recursive(rec):
 
-		if rec.reldepth == godag[term].reldepth+x:
+		if rec.depth == godag[term].depth+x:
 			return [[rec]]
 		else:
 			paths = []
@@ -555,101 +537,99 @@ def Downward_Semantic_Value(go_id, go, x):
 	#print(S_values)
 	return final_values(S_values, 'max')
 ### Calculating Similarity 
-def Similarity_of_Two_GOTerms(go_id1, go_id2, go, method):
-#	if go_id1 == go_id2:
-#			return 1.0000
-	if method == 'Baseline_LCA_max' or method == 'Baseline_LCA_min':
-		lca = lowest_common_ancestor((go_id1, go_id2), go)
-		sim = Semantic_Value(lca, go, method)
-		return sim[1]
-	if method == 'Baseline_LCA_avg':
-		lca = lowest_common_ancestor((go_id1, go_id2), go)
-		#print(lca)
-		sim_lca = Semantic_Value(lca, go, method)
-		#print(sim_lca[1])
-		sim1 = Semantic_Value(go_id1, go, method)
-		sim2 = Semantic_Value(go_id2, go, method)
-		
-		#print(sim1, sim2)
-		# sim1[1] and sim2[1] are the sums of all the nodes on the path with the max s-values. 
-		avg_div = (sim1[1] + sim2[1])/2
-		return (sim_lca[1]/avg_div)
-	
-	elif method == 'GOntoSim':
-		hcd = highest_common_descendant((go_id1, go_id2), go)
-		if hcd != 0:
-			hcd_depth = go[hcd].reldepth
-			go1_depth = go[go_id1].reldepth
-			go2_depth = go[go_id2].reldepth
-			x = hcd_depth - go1_depth
-			y = hcd_depth - go2_depth
-			sv_a = Downward_Semantic_Value(go_id1, go, x)
-			sv_b = Downward_Semantic_Value(go_id2, go, y)
-			intersecting_terms = intersection(sv_a,sv_b)
-			numerator = sum([x for t in intersecting_terms for x in t]) # Sum of common terms in all paths wrt to each of the 2 terms
-			denominator = sum(x for y, x in sv_a) + sum(x for y, x in sv_b) #(where sv_a has 2 values for each term, second being the SV)
-			sim_down = (numerator/denominator)
-		else:
-			sim_down = 0
-		sim_upper = Similarity_of_Two_GOTerms(go_id1,go_id2, go, 'Baseline_LCA_avg')
-		sim = (sim_down*0.5) + sim_lca_upper
-		return sim
-		
-	elif method == 'wang' or method == 'Baseline' or method == 'GOGO':
-		sv_a = Semantic_Value(go_id1, go, method)
-		sv_b = Semantic_Value(go_id2, go,  method)
-		#print(sv_a[1], sv_b[1])
-		intersecting_terms = intersection(sv_a,sv_b)
-		#print([x for t in intersecting_terms for x in t])
-		numerator = sum([x for t in intersecting_terms for x in t])
-		#print(numerator)
-		denominator = sum(x for y, x in sv_a) + sum(x for y, x in sv_b) #(where sv_a has 2 values for each term, second being the SV)
-		#print (denominator)
-		Similarity = (numerator/denominator)
-		return Similarity
-	elif method == 'Baseline_Desc':
-		hcd = highest_common_descendant((go_id1, go_id2), go)
-		if hcd != 0:
-			hcd_depth = go[hcd].reldepth
-			go1_depth = go[go_id1].reldepth
-			go2_depth = go[go_id2].reldepth
-			x = hcd_depth - go1_depth
-			y = hcd_depth - go2_depth
-			sv_a = Downward_Semantic_Value(go_id1, go, x)
-			sv_b = Downward_Semantic_Value(go_id2, go, y)
-			intersecting_terms = intersection(sv_a,sv_b)
-			numerator = sum([x for t in intersecting_terms for x in t]) # Sum of common terms in all paths wrt to each of the 2 terms
-			denominator = sum(x for y, x in sv_a) + sum(x for y, x in sv_b) #(where sv_a has 2 values for each term, second being the SV)
-			sim_down = (numerator/denominator)
-		else:
-			sim_down = 0
-		sim_upper = Similarity_of_Two_GOTerms(go_id1,go_id2, go, 'Baseline')
-		sim = (sim_down*0.5) + sim_upper
-		return sim
-	elif method == 'Baseline_Desc_only':
-		hcd = highest_common_descendant((go_id1, go_id2), go)
-		if hcd != 0:
-			hcd_depth = go[hcd].reldepth
-			go1_depth = go[go_id1].reldepth
-			go2_depth = go[go_id2].reldepth
-			x = hcd_depth - go1_depth
-			y = hcd_depth - go2_depth
-			sv_a = Downward_Semantic_Value(go_id1, go, x)
-			sv_b = Downward_Semantic_Value(go_id2, go, y)
-			intersecting_terms = intersection(sv_a,sv_b)
-			numerator = sum([x for t in intersecting_terms for x in t]) # Sum of common terms in all paths wrt to each of the 2 terms
-			denominator = sum(x for y, x in sv_a) + sum(x for y, x in sv_b) #(where sv_a has 2 values for each term, second being the SV)
-			sim_down = (numerator/denominator)
-		else:
-			sim_down = 0
-		#sim_upper = Similarity_of_Two_GOTerms(go_id1,go_id2, go, 'Baseline')
-		#sim = (sim_down*0.5) + sim_upper
-		return sim_down
-		
-	
+# def Similarity_of_Two_GOTerms(go_id1, go_id2, go, method):
+# #	if go_id1 == go_id2:
+# #			return 1.0000
+# 	if method == 'Baseline_LCA_max' or method == 'Baseline_LCA_min':
+# 		lca = lowest_common_ancestor((go_id1, go_id2), go)
+# 		sim = Semantic_Value(lca, go, method)
+# 		return sim[1]
+# 	if method == 'Baseline_LCA_avg':
+# 		lca = lowest_common_ancestor((go_id1, go_id2), go)
+# 		#print(lca)
+# 		sim_lca = Semantic_Value(lca, go, method)
+# 		#print(sim_lca[1])
+# 		sim1 = Semantic_Value(go_id1, go, method)
+# 		sim2 = Semantic_Value(go_id2, go, method)
+# 		
+# 		#print(sim1, sim2)
+# 		# sim1[1] and sim2[1] are the sums of all the nodes on the path with the max s-values. 
+# 		avg_div = (sim1[1] + sim2[1])/2
+# 		return (sim_lca[1]/avg_div)
+# 	
+# 	elif method == 'GOntoSim':
+# 		hcd = highest_common_descendant((go_id1, go_id2), go)
+# 		if hcd != 0:
+# 			hcd_depth = go[hcd].depth
+# 			go1_depth = go[go_id1].depth
+# 			go2_depth = go[go_id2].depth
+# 			x = hcd_depth - go1_depth
+# 			y = hcd_depth - go2_depth
+# 			sv_a = Downward_Semantic_Value(go_id1, go, x)
+# 			sv_b = Downward_Semantic_Value(go_id2, go, y)
+# 			intersecting_terms = intersection(sv_a,sv_b)
+# 			numerator = sum([x for t in intersecting_terms for x in t]) # Sum of common terms in all paths wrt to each of the 2 terms
+# 			denominator = sum(x for y, x in sv_a) + sum(x for y, x in sv_b) #(where sv_a has 2 values for each term, second being the SV)
+# 			sim_down = (numerator/denominator)
+# 		else:
+# 			sim_down = 0
+# 		sim_upper = Similarity_of_Two_GOTerms(go_id1,go_id2, go, 'Baseline_LCA_avg')
+# 		sim = (sim_down*0.5) + sim_lca_upper
+# 		return sim
+# 		
+# 	elif method == 'wang' or method == 'Baseline' or method == 'GOGO':
+# 		sv_a = Semantic_Value(go_id1, go, method)
+# 		sv_b = Semantic_Value(go_id2, go,  method)
+# 		#print(sv_a[1], sv_b[1])
+# 		intersecting_terms = intersection(sv_a,sv_b)
+# 		#print([x for t in intersecting_terms for x in t])
+# 		numerator = sum([x for t in intersecting_terms for x in t])
+# 		#print(numerator)
+# 		denominator = sum(x for y, x in sv_a) + sum(x for y, x in sv_b) #(where sv_a has 2 values for each term, second being the SV)
+# 		#print (denominator)
+# 		Similarity = (numerator/denominator)
+# 		return Similarity
+# 	elif method == 'Baseline_Desc':
+# 		hcd = highest_common_descendant((go_id1, go_id2), go)
+# 		if hcd != 0:
+# 			hcd_depth = go[hcd].depth
+# 			go1_depth = go[go_id1].depth
+# 			go2_depth = go[go_id2].depth
+# 			x = hcd_depth - go1_depth
+# 			y = hcd_depth - go2_depth
+# 			sv_a = Downward_Semantic_Value(go_id1, go, x)
+# 			sv_b = Downward_Semantic_Value(go_id2, go, y)
+# 			intersecting_terms = intersection(sv_a,sv_b)
+# 			numerator = sum([x for t in intersecting_terms for x in t]) # Sum of common terms in all paths wrt to each of the 2 terms
+# 			denominator = sum(x for y, x in sv_a) + sum(x for y, x in sv_b) #(where sv_a has 2 values for each term, second being the SV)
+# 			sim_down = (numerator/denominator)
+# 		else:
+# 			sim_down = 0
+# 		sim_upper = Similarity_of_Two_GOTerms(go_id1,go_id2, go, 'Baseline')
+# 		sim = (sim_down*0.5) + sim_upper
+# 		return sim
+# 	elif method == 'Baseline_Desc_only':
+# 		hcd = highest_common_descendant((go_id1, go_id2), go)
+# 		if hcd != 0:
+# 			hcd_depth = go[hcd].depth
+# 			go1_depth = go[go_id1].depth
+# 			go2_depth = go[go_id2].depth
+# 			x = hcd_depth - go1_depth
+# 			y = hcd_depth - go2_depth
+# 			sv_a = Downward_Semantic_Value(go_id1, go, x)
+# 			sv_b = Downward_Semantic_Value(go_id2, go, y)
+# 			intersecting_terms = intersection(sv_a,sv_b)
+# 			numerator = sum([x for t in intersecting_terms for x in t]) # Sum of common terms in all paths wrt to each of the 2 terms
+# 			denominator = sum(x for y, x in sv_a) + sum(x for y, x in sv_b) #(where sv_a has 2 values for each term, second being the SV)
+# 			sim_down = (numerator/denominator)
+# 		else:
+# 			sim_down = 0
+# 		#sim_upper = Similarity_of_Two_GOTerms(go_id1,go_id2, go, 'Baseline')
+# 		#sim = (sim_down*0.5) + sim_upper
+# 		return sim_down
+# 			
 def Similarity_of_Two_GOTerms(go_id1, go_id2, go, method, S_values):
-#	if go_id1 == go_id2:
-#			return 1.0000
+
 	if method == 'Baseline_LCA_max' or method == 'Baseline_LCA_min':
 		lca = lowest_common_ancestor((go_id1, go_id2), go)
 		sim = Semantic_Value(lca, go, method)
@@ -684,9 +664,9 @@ def Similarity_of_Two_GOTerms(go_id1, go_id2, go, method, S_values):
 			if go_id1 != 'GO:0003674' and go_id1 !='GO:0005575' and go_id1 != 'GO:0008150' and  go_id2 != 'GO:0003674' and go_id2 !='GO:0005575' and go_id2 != 'GO:0008150':
 				hcd = highest_common_descendant((go_id1, go_id2), go)
 				if hcd != 0:
-					hcd_depth = go[hcd].reldepth
-					go1_depth = go[go_id1].reldepth
-					go2_depth = go[go_id2].reldepth
+					hcd_depth = go[hcd].depth
+					go1_depth = go[go_id1].depth
+					go2_depth = go[go_id2].depth
 					x = hcd_depth - go1_depth
 					y = hcd_depth - go2_depth
 					sv_a = Downward_Semantic_Value(go_id1, go, x)
@@ -747,9 +727,9 @@ def Similarity_of_Two_GOTerms(go_id1, go_id2, go, method, S_values):
 			if go_id1 != 'GO:0003674' and go_id1 !='GO:0005575' and go_id1 != 'GO:0008150' and  go_id2 != 'GO:0003674' and go_id2 !='GO:0005575' and go_id2 != 'GO:0008150':
 				hcd = highest_common_descendant((go_id1, go_id2), go)
 				if hcd != 0:
-					hcd_depth = go[hcd].reldepth
-					go1_depth = go[go_id1].reldepth
-					go2_depth = go[go_id2].reldepth
+					hcd_depth = go[hcd].depth
+					go1_depth = go[go_id1].depth
+					go2_depth = go[go_id2].depth
 					x = hcd_depth - go1_depth
 					y = hcd_depth - go2_depth
 					sv_a = Downward_Semantic_Value(go_id1, go, x)
@@ -779,9 +759,9 @@ def Similarity_of_Two_GOTerms(go_id1, go_id2, go, method, S_values):
 
 		hcd = highest_common_descendant((go_id1, go_id2), go)
 		if hcd != 0:
-			hcd_depth = go[hcd].reldepth
-			go1_depth = go[go_id1].reldepth
-			go2_depth = go[go_id2].reldepth
+			hcd_depth = go[hcd].depth
+			go1_depth = go[go_id1].depth
+			go2_depth = go[go_id2].depth
 			x = hcd_depth - go1_depth
 			y = hcd_depth - go2_depth
 			sv_a = Downward_Semantic_Value(go_id1, go, x)
@@ -894,35 +874,7 @@ def Similarity_Matrix_IC(genes, method, termcounts):
 		sim_matrix.append([(lambda x: Similarity_of_Set_of_GOTerms_IC(x[1],gene[1], method, termcounts))(x) for x in genes])
 	return sim_matrix
 
-def Agglomerative_Clustering(pathway, Genes, n_clusters, method):
-	# Similarity Matrix
-	data = Similarity_Matrix(Genes, method)
-
-	length = len(data)
-	data1 =pd.DataFrame(data = data, index=[x[0] for x in Genes],columns=[x[0]for x in Genes])
-	data_matrix = []
-	for row in data:
-		data_matrix.append([(lambda x: 1-x)(x) for x in row])
-	my_data = pd.DataFrame(data = data_matrix, index=[x[0] for x in Genes],columns=[x[0]for x in Genes])
-	return AgglomerativeWithScipyWithoutDendogram(my_data, pathway, n_clusters) 
-
-def Agglomerative_Clustering2(pathway, Genes, n_clusters, method):
-	# Similarity Matrix
-	data = Similarity_Matrix(Genes, method)
-	length = len(data)
-	data1 = pd.DataFrame(data = data, index=[x[0] for x in Genes],columns=[x[0]for x in Genes])
-	#print('similarity matrix: ')
-	#print(data1)
-	#data1.to_csv(pathway, index=False, header=False)
-	data_matrix = []
-	for row in data:
-		data_matrix.append([(lambda x: 1-x)(x) for x in row])
-	my_data = pd.DataFrame(data = data_matrix, index=[x[0] for x in Genes],columns=[x[0]for x in Genes])
-	#print('distance matrix: ')
-	#print( my_data)
-	return AgglomerativeWithScipy(my_data, pathway, n_clusters)
-
-def Agglomerative_Clustering_getMatrices(pathway, Genes, n_clusters, method, S_values):
+def Agglomerative_Clustering(pathway, Genes, n_clusters, method, S_values):
 	# Similarity Matrix
 	data = Similarity_Matrix(Genes, method, S_values)
 	length = len(data)
@@ -935,15 +887,19 @@ def Agglomerative_Clustering_getMatrices(pathway, Genes, n_clusters, method, S_v
 	for row in data:
 		data_matrix.append([(lambda x: 1-x)(x) for x in row])
 	my_data = pd.DataFrame(data = data_matrix, index=[x[0] for x in Genes],columns=[x[0]for x in Genes])
-	# print('distance matrix: ')
+		# print('distance matrix: ')
 	# print( my_data)
 	# writeDist = pathway + "_DistanceMatrix.csv"
-	# my_data.to_csv(writeDist)		
-	return AgglomerativeWithScipyWithoutDendogram(my_data,Genes, pathway, n_clusters)
+	# my_data.to_csv(writeDist)	
+	return Agglomerative(my_data,Genes, pathway, n_clusters)
+	
 
+def Agglomerative(data, Genes, pathway, n_clusters):
+	model = AgglomerativeClustering(n_clusters, affinity='precomputed', linkage='complete').fit_predict(data)
+	#GeneNames = [gene.GeneName for gene in Genes]
+	return model.tolist()
 
-
-def Agglomerative_Clustering_getMatrices_IC(pathway, Genes, n_clusters, method, termcounts):
+def AgglomerativeClusteringIC(pathway, Genes, n_clusters, method, termcounts):
 	# Similarity Matrix
 	data = Similarity_Matrix_IC(Genes, method, termcounts)
 	length = len(data)
@@ -960,36 +916,9 @@ def Agglomerative_Clustering_getMatrices_IC(pathway, Genes, n_clusters, method, 
 	# print( my_data)
 	# writeDist = pathway + "_DistanceMatrix.csv"
 	# my_data.to_csv(writeDist)		
-	return AgglomerativeWithScipyWithoutDendogram(my_data,Genes, pathway, n_clusters)
+	return Agglomerative(my_data,Genes, pathway, n_clusters)
 
-def AgglomerativeWithScipyWithoutDendogram( data, Genes, pathway, n_clusters):
-	#model = AgglomerativeClustering(n_clusters, affinity='precomputed', linkage='complete').fit(data)
-	model = AgglomerativeClustering(n_clusters, affinity='precomputed', linkage='complete').fit_predict(data)
-	#Single linkage minimizes the distance between the closest observations of pairs of clusters.
-	#print(model)
-	GeneNames = [gene.GeneName for gene in Genes]
-	#labelledList = list(zip(GeneNames, model.tolist()))
-	#file1 = open(pathway+'_Labels.txt',"w") 
-	#for listitem in labelledList:
-	#file1.write(labelledList)
-	#file1.writelines([str(line) + "\n" for line in labelledList])
-	return model.tolist()
 
-def AgglomerativeWithScipy(data, Pathway, n_clusters):
-	#model = AgglomerativeClustering(n_clusters, affinity='precomputed', linkage='complete').fit(data)
-	model = AgglomerativeClustering(n_clusters, affinity='precomputed', linkage='complete').fit_predict(data)
-	#Single linkage minimizes the distance between the closest observations of pairs of clusters.
-	#print('labels ',model.labels_.tolist())
-	#print(model.children_)
-	Genetitle = 'Hierarchical Clustering of ' + Pathway
-	# plt.title(Genetitle)
-# 	plot_dendrogram(model, data, labels=data.index)
-# 	plt.show()
-# 	#plt.close()
-# 	plt.savefig(Pathway)
-	#print(len(model.labels_))
-	#return model.labels_.tolist()
-	return model.tolist()
 
 def plot_dendrogram(model, dist,**kwargs):
 	distance1 = dist.to_numpy() 
@@ -1196,14 +1125,14 @@ def main():
 			if sys.argv[2] == 'MF':
 				if sys.argv[3] == 'IEA': 
 					termcounts = semantic_value_resnik_lin_IEA_MF()
-					labels_pred = Agglomerative_Clustering_getMatrices_IC(label, Classes, n_clusters, method, termcounts)
+					labels_pred = AgglomerativeClusteringIC(label, Classes, n_clusters, method, termcounts)
 				if sys.argv[3] == 'NONIEA': 
 					termcounts = semantic_value_resnik_lin_nonIEA_MF()
-					labels_pred = Agglomerative_Clustering_getMatrices_IC(label, Classes, n_clusters, method, termcounts)
+					labels_pred = AgglomerativeClusteringIC(label, Classes, n_clusters, method, termcounts)
 
 		else:		
 			_dict = dict(S_values)
-			labels_pred = Agglomerative_Clustering_getMatrices(label, Classes, n_clusters, method, _dict)
+			labels_pred = Agglomerative_Clustering(label, Classes, n_clusters, method, _dict)
 		purityscore = purity_score(labels_true, labels_pred)
 		ARIScore = ARI_Score(labels_true, labels_pred)
 		AMIScore =  AMI_Score(labels_true, labels_pred)
