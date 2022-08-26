@@ -1,6 +1,7 @@
 # GOntoSim
 
 Source code and datasets of the paper 'GOntoSim: A Semantic Similarity Measure based on LCA and Common Descendants'.
+
 Web server is available at http://www.cbrlab.org/GOntoSim.html.
 
 ## Dependencies
