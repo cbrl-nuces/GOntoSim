@@ -1,5 +1,6 @@
-# GOntoSim: A Semantic Similarity Measure based on LCA and Common Descendants
+# GOntoSim
 
+Source code and datasets of the paper 'GOntoSim: A Semantic Similarity Measure based on LCA and Common Descendants'.
 Web server is available at http://www.cbrlab.org/GOntoSim.html.
 
 ## Dependencies
@@ -73,9 +74,25 @@ This experiment uses the Molecular Function GO term annotations (IEA) for the En
 python GOntoSim.py gontosim MF IEA 500
 
 ```
+## Cite
+If you use ``GOntoSim``, we would appreciate a citation:
 
+Kamran, A.B., Naveed, H. GOntoSim: a semantic similarity measure based on LCA and common descendants. Sci Rep 12, 3818 (2022). https://doi.org/10.1038/s41598-022-07624-3
 
-
+.. code:: bibtex
+@article{kamran2022gontosim,
+  title={GOntoSim: a semantic similarity measure based on LCA and common descendants},
+  author={Kamran, Amna Binte and Naveed, Hammad},
+  journal={Scientific reports},
+  volume={12},
+  number={1},
+  pages={1--10},
+  year={2022},
+  publisher={Nature Publishing Group},
+  doi = {https://doi.org/10.1038/s41598-022-07624-3},
+  url = {https://www.nature.com/articles/s41598-022-07624-3},
+  copyright = {http://creativecommons.org/licenses/by/4.0/}
+}
 
 
 
