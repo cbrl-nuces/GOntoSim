@@ -74,7 +74,8 @@ This experiment uses the Molecular Function GO term annotations (IEA) for the En
 python GOntoSim.py gontosim MF IEA 500
 
 ```
-## Cite
+<!-- ## Cite -->
+## Reference
 If you use ``GOntoSim``, we would appreciate a citation:
 
 Kamran, A.B., Naveed, H. GOntoSim: a semantic similarity measure based on LCA and common descendants. Sci Rep 12, 3818 (2022). https://doi.org/10.1038/s41598-022-07624-3
@@ -95,7 +96,7 @@ Kamran, A.B., Naveed, H. GOntoSim: a semantic similarity measure based on LCA an
 }
  -->
 
-
+## Contact
 Contact hammad.naveed@nu.edu.pk or amna.kamran@nu.edu.pk
 
 Feel free to contact us in case of any confusions.
